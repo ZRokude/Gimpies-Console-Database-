@@ -84,5 +84,25 @@ namespace Console_Gimpie__Database_
             Console.Write(new string(' ', Console.BufferWidth));
             Console.SetCursorPosition(0, currentLineCursor);
         }
+        public int RNGNumber()
+        {
+            Random rnd = new Random();
+            int RandomNumber = int.Parse("800" + rnd.Next(1, 99999).ToString());
+            return  RandomNumber;
+        }
+        public void InsertList (int a, int b)
+        {
+            //ListTotalValue NewValue = new ListTotalValue
+            //{
+            //    Value = a
+            //};
+            //ListTotalValue.TotalValue.Add(NewValue);
+            //ListTotalProductID NewProductID = new ListTotalProductID
+            //{
+            //    ProductID = b
+            //};
+            //ListTotalProductID.TotalProductID.Add(NewProductID);
+        }
+
     }
 }

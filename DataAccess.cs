@@ -102,8 +102,16 @@ namespace Console_Gimpie__Database_
                     {
                         for (int i = 0; i < DataReader.FieldCount; i++)
                         {
-                            Console.Write(DataReader.GetValue(i) + "\t");
-
+                            if (Convert.ToInt32(DataReader.GetValue(6)) <= 5)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.Write(DataReader.GetValue(i) + "\t");
+                                Console.ForegroundColor = ConsoleColor.White;
+                            }
+                            else
+                            {
+                                Console.Write(DataReader.GetValue(i) + "\t");
+                            }
                         }
                         Console.WriteLine("");
                     }
@@ -140,8 +148,9 @@ namespace Console_Gimpie__Database_
                     DataReader = com.ExecuteReader();
                     while (DataReader.Read())
                     {
-                        for (int i = 0; i < DataReader.FieldCount; i++)
+                        for (int i = 0; i < 5; i++)
                         {
+
                             Console.Write(DataReader.GetValue(i) + "\t");
 
                         }
@@ -171,7 +180,7 @@ namespace Console_Gimpie__Database_
             }
         }
 
-        public void InsertBuyHistory(string ProductListCheck, int ProductID, int UserID, decimal Price, int Quantity)
+        public void InsertBuyHistory(string ProductListCheck, int ProductID, int UserID, decimal Price, int Quantity, int PurchaseID)
         {
             using (SqlConnection connection = new SqlConnection(connectingString))
             {
@@ -182,6 +191,7 @@ namespace Console_Gimpie__Database_
                     com.Parameters.AddWithValue("@ProductID", ProductID);
                     com.Parameters.AddWithValue("@Quantity", Quantity);
                     com.Parameters.AddWithValue("@Price", Price);
+                    com.Parameters.AddWithValue("@PurchaseID", PurchaseID);
                     int a = com.ExecuteNonQuery();
                     if (a > 0)
                     {

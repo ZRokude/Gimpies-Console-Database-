@@ -10,11 +10,16 @@ namespace Console_Gimpie__Database_
     internal class Program
     {
         public static DataTable DataList, UserLogin;
-        public static int LoginAttempts = 0, BuyItem, ChooseID, Value, UserID;
+        public static int LoginAttempts = 0, BuyItem, ChooseID, Value, UserID, PurchaseID;
         public static decimal Price;
+
+        public static int[] TotalValue, TotalProductID, TotalPurchaseID;
+       
+
         
         static void Main(string[] args)
         {
+           
             while (true)
             {
                 Console.WriteLine("Welcome to Gimpies");
@@ -44,7 +49,6 @@ namespace Console_Gimpie__Database_
         }
         static void Login()
         {
-
             Console.Write("Username: ");
             string user = Console.ReadLine();
             Console.Write("Password: ");
@@ -175,24 +179,26 @@ namespace Console_Gimpie__Database_
                 ShoesList();
             }
         }
+        public static void InsertListToArray()
+        {
+           
+            TotalValue = ListTotalValue.TotalValue.ToArray(); TotalProductID = ListTotalProductID.TotalProductID.ToArray(); TotalPurchaseID = ListTotalPurchaseID.TotalPurchaseID.ToArray();
+        }
         static void AddMenu()
         {
             Console.WriteLine("How many do you want to buy?\nPlease proceed only with number.");
             Value =Convert.ToInt32(Console.ReadLine());
             try
             {
-                //for (int i = 0; i < BuyValue.Length; i++)
-                //{
-                //    BuyValue[i] = int.Parse(Console.ReadLine());
-                //}
-
-
                 if (Convert.ToInt32(DataList.Rows[0].ItemArray[6]) - Convert.ToInt32(Value) >= 0)
                 {
-                    string ProductListCheck = "INSERT INTO PurchaseHistory (UserID, ProductID, Price, Quantity) VALUES (@UserID, @ProductID, @Price, @Quantity)";
+                    PurchaseID = FunctionAccess.Instance.RNGNumber();
+                    string ProductListCheck = "INSERT INTO PurchaseHistory (UserID, ProductID, Price, Quantity, PurchaseID) VALUES (@UserID, @ProductID, @Price, @Quantity, @PurchaseID)";
                     int ProductID = Convert.ToInt32( DataList.Rows[0].ItemArray[0]);int UserID = Convert.ToInt32(UserLogin.Rows[0].ItemArray[0]);
                     decimal Price = Convert.ToDecimal(DataList.Rows[0].ItemArray[5]);
-                    DataAccess.Instance.InsertBuyHistory(ProductListCheck, ProductID, UserID, Price , Value); 
+                    DataAccess.Instance.InsertBuyHistory(ProductListCheck, ProductID, UserID, Price , Value, PurchaseID);
+                    ListTotalProductID.TotalProductID.Add(ProductID); ListTotalValue.TotalValue.Add(Value); ListTotalPurchaseID.TotalPurchaseID.Add(PurchaseID);
+                    InsertListToArray();
                     Console.WriteLine("You've succesfully added the item to the basket.\nPress anything to go back to menu");
                     Console.ReadKey();
                     Console.Clear();
@@ -220,19 +226,31 @@ namespace Console_Gimpie__Database_
         static void Basket()
         {
 
-            string ProductListCheck = "SELECT * FROM ProductList WHERE ID = '" + ChooseID + "'";
-            DataAccess.Instance.DataReaderProductList(ProductListCheck);
+            string ProductListCheck = "SELECT * FROM ProductList";
+            DataAccess.Instance.DataReaderColumnsProductList(ProductListCheck);
+            for (int i = 0; i < ListTotalPurchaseID.TotalPurchaseID.Count; i++)
+            {
+                string ProductListValue = "SELECT * FROM ProductList WHERE ID = '" + TotalProductID[i] + "'";
+                DataAccess.Instance.DataReaderItemsProductList(ProductListValue);
+            }
             FunctionAccess.Instance.CreateEmpptyLine();
-            Console.WriteLine("You have: " + Value + " For ID" + ChooseID + "\nAre You Sure Want to Proceed? \nPress Y for Yes \nPress N for Cancel the Purchase");
-           
-            Console.WriteLine("Press 0 for Quit");
+            for (int i = 0; i < ListTotalValue.TotalValue.Count; i++)
+            {
+                Console.WriteLine("You have: " + TotalValue[i] + " For ID" + TotalProductID[i]);
+            }
+            Console.WriteLine("Are you sure want to Proceed? \nPress Y for Continue \nPress N for Cancel the Payment \nPress 0 to Quit");
             try
             {
                 if (Console.ReadKey(true).Key == ConsoleKey.Y)
                 {
                     // Product Update in Database
-                    string ProductListUpdate = "UPDATE ProductList SET Quantity = Quantity - '" + Value + "'N WHERE ID = '" + ChooseID + "'";
-                    DataAccess.Instance.UpdateProductList(ProductListUpdate);
+                    for (int i = 0; i < ListTotalPurchaseID.TotalPurchaseID.Count; i++)
+                    {
+                        string ProductListUpdate = "UPDATE ProductList SET Quantity = Quantity - '" + TotalValue[i] + "' WHERE ID = '" + TotalProductID[i] + "'";
+                        DataAccess.Instance.UpdateProductList(ProductListUpdate);
+                    }
+                    ListTotalProductID.TotalProductID.Clear();ListTotalPurchaseID.TotalPurchaseID.Clear();ListTotalValue.TotalValue.Clear();
+                    InsertListToArray();
                     FunctionAccess.Instance.CreateEmpptyLine();
                     Console.WriteLine("Purchase Succesful, Thank you for the Buy! :D");
                     System.Threading.Thread.Sleep(500);
@@ -243,11 +261,16 @@ namespace Console_Gimpie__Database_
                 }
                 else if (Console.ReadKey(true).Key == ConsoleKey.N)
                 {
-                    string ProductListDelete = "DELETE PurchaseHistory WHERE ProductID = '" + ChooseID + "' AND UserID = '" + UserID + "'";
-                    DataAccess.Instance.UpdateProductList(ProductListDelete);
+                    for(int i = 0; i < ListTotalPurchaseID.TotalPurchaseID.Count;i++)
+                    {
+                        string ProductListDelete = "DELETE PurchaseHistory WHERE ProductID = '" + TotalProductID[i] + "' AND PurchaseID = '" + TotalPurchaseID[i] + "'";
+                        DataAccess.Instance.UpdateProductList(ProductListDelete);
+                    }
+                    ListTotalProductID.TotalProductID.Clear(); ListTotalPurchaseID.TotalPurchaseID.Clear(); ListTotalValue.TotalValue.Clear();
+                    InsertListToArray();
+                    FunctionAccess.Instance.CreateEmpptyLine();
                     Console.WriteLine("Press Anything to go Back to Menu");
-                    Console.ReadKey();
-                    Console.Clear();
+                    Console.ReadKey();Console.Clear();
                     Menu();
                 }
                 else if (Console.ReadKey(true).Key == ConsoleKey.D0)
@@ -310,6 +333,7 @@ namespace Console_Gimpie__Database_
                 }
             }
         }
+
     }
 }
 
