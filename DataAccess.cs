@@ -5,15 +5,9 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Net.Http.Headers;
-using System.Security.Cryptography;
-using System.Diagnostics;
 
-namespace Console_Gimpie__with_database_
+namespace Console_Gimpie__Database_
 {
-    //SINGLETON Pattern SQLConnection
     public sealed class DataAccess
     {
         private readonly SqlConnection connect = new SqlConnection(@"Data Source=ZRoku\SQLEXPRESS;Initial Catalog=Gimpie;Integrated Security=True");
@@ -42,7 +36,7 @@ namespace Console_Gimpie__with_database_
                 return instance;
             }
         }
-        public DataTable ExecuteDataTableUser (string UserCheck)
+        public DataTable ExecuteDataTableUser(string UserCheck)
         {
             DataList = new DataTable();
             using (SqlConnection connection = new SqlConnection(connectingString))
@@ -66,15 +60,14 @@ namespace Console_Gimpie__with_database_
                 connection.Open();
                 using (com = new SqlCommand(ProductListCheck, connection))
                 {
-                    using (SDA= new SqlDataAdapter(com))
+                    using (SDA = new SqlDataAdapter(com))
                     {
                         SDA.Fill(DataList);
-                        
+
                     }
-                    
+
                 }
             }
-            
             return DataList;
         }
         public void UpdateProductList(string UpdateProductList)
@@ -89,7 +82,7 @@ namespace Console_Gimpie__with_database_
                 }
                 //connection.Close();
             }
-            
+
         }
         public SqlDataReader DataReaderProductList(string ProductListCheck)
         {
@@ -115,10 +108,48 @@ namespace Console_Gimpie__with_database_
                         Console.WriteLine("");
                     }
                 }
-                
+
             }
             return DataReader;
-            
+
+        }
+        public SqlDataReader DataReaderColumnsProductList(string ProductListColumn)
+        {
+            using (SqlConnection connection = new SqlConnection(connectingString))
+            {
+                connection.Open();
+                using (com = new SqlCommand(ProductListColumn, connection))
+                {
+                    DataReader = com.ExecuteReader();
+                    for (int i = 0; i < DataReader.FieldCount; i++)
+                    {
+                        Console.Write(DataReader.GetName(i) + "\t");
+                    }
+                    Console.WriteLine("");
+                }
+            }
+            return DataReader;
+        }
+        public SqlDataReader DataReaderItemsProductList(string ProductListCheck)
+        {
+            using (SqlConnection connection = new SqlConnection(connectingString))
+            {
+                connection.Open();
+                using (com = new SqlCommand(ProductListCheck, connection))
+                {
+                    DataReader = com.ExecuteReader();
+                    while (DataReader.Read())
+                    {
+                        for (int i = 0; i < DataReader.FieldCount; i++)
+                        {
+                            Console.Write(DataReader.GetValue(i) + "\t");
+
+                        }
+                        Console.WriteLine("");
+                    }
+                }
+            }
+            return DataReader;
         }
         public void InsertUser(string UserInsertCheck, string Password, string Username, string Role, int RandomNum)
         {
@@ -139,15 +170,25 @@ namespace Console_Gimpie__with_database_
                 }
             }
         }
-        
-        
-        public SqlConnection DataAccessConnection()
+
+        public void InsertBuyHistory(string ProductListCheck, int ProductID, int UserID, decimal Price, int Quantity)
         {
-            return connect;
+            using (SqlConnection connection = new SqlConnection(connectingString))
+            {
+                connection.Open();
+                using (com = new SqlCommand(ProductListCheck, connection))
+                {
+                    com.Parameters.AddWithValue("@UserID", UserID);
+                    com.Parameters.AddWithValue("@ProductID", ProductID);
+                    com.Parameters.AddWithValue("@Quantity", Quantity);
+                    com.Parameters.AddWithValue("@Price", Price);
+                    int a = com.ExecuteNonQuery();
+                    if (a > 0)
+                    {
+                        Console.WriteLine("Data History Saved to Server");
+                    }
+                }
+            }
         }
-       
-
-
     }
-   
 }
