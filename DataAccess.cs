@@ -18,6 +18,7 @@ namespace Console_Gimpie__Database_
         public static SqlDataReader DataReader;
         private static DataAccess instance = new DataAccess();
         private static readonly object padlock = new object();
+        public static int Index = 0;
 
         // Explicit static constructor to tell C# compiler
         // not to mark type as beforefieldinit
@@ -36,29 +37,13 @@ namespace Console_Gimpie__Database_
                 return instance;
             }
         }
-        public DataTable ExecuteDataTableUser(string UserCheck)
+        public DataTable ExecuteDataTable(string query)
         {
             DataList = new DataTable();
             using (SqlConnection connection = new SqlConnection(connectingString))
             {
                 connection.Open();
-                using (com = new SqlCommand(UserCheck, connection))
-                {
-                    using (SDA = new SqlDataAdapter(com))
-                    {
-                        SDA.Fill(DataList);
-                    }
-                }
-            }
-            return DataList;
-        }
-        public DataTable ExecuteDataTableProductList(string ProductListCheck)
-        {
-            DataList = new DataTable();
-            using (SqlConnection connection = new SqlConnection(connectingString))
-            {
-                connection.Open();
-                using (com = new SqlCommand(ProductListCheck, connection))
+                using (com = new SqlCommand(query, connection))
                 {
                     using (SDA = new SqlDataAdapter(com))
                     {
@@ -70,13 +55,13 @@ namespace Console_Gimpie__Database_
             }
             return DataList;
         }
-        public void UpdateProductList(string UpdateProductList)
+        public void SQLCmd(string Query)
         {
 
             using (SqlConnection connection = new SqlConnection(connectingString))
             {
                 connection.Open();
-                using (com = new SqlCommand(UpdateProductList, connection))
+                using (com = new SqlCommand(Query, connection))
                 {
                     com.ExecuteNonQuery();
                 }
@@ -84,7 +69,7 @@ namespace Console_Gimpie__Database_
             }
 
         }
-        public SqlDataReader DataReaderProductList(string ProductListCheck)
+        public SqlDataReader DataReaderCV(string ProductListCheck)
         {
 
             using (SqlConnection connection = new SqlConnection(connectingString))
@@ -93,14 +78,14 @@ namespace Console_Gimpie__Database_
                 using (com = new SqlCommand(ProductListCheck, connection))
                 {
                     DataReader = com.ExecuteReader();
-                    for (int i = 0; i < DataReader.FieldCount; i++)
+                    for (int i = 1; i < DataReader.FieldCount; i++)
                     {
                         Console.Write(DataReader.GetName(i) + "\t");
                     }
                     Console.WriteLine("");
                     while (DataReader.Read())
                     {
-                        for (int i = 0; i < DataReader.FieldCount; i++)
+                        for (int i = 1; i < DataReader.FieldCount; i++)
                         {
                             if (Convert.ToInt32(DataReader.GetValue(6)) <= 5)
                             {
@@ -121,7 +106,7 @@ namespace Console_Gimpie__Database_
             return DataReader;
 
         }
-        public SqlDataReader DataReaderColumnsProductList(string ProductListColumn)
+        public SqlDataReader DataReaderC(string ProductListColumn)
         {
             using (SqlConnection connection = new SqlConnection(connectingString))
             {
@@ -129,7 +114,7 @@ namespace Console_Gimpie__Database_
                 using (com = new SqlCommand(ProductListColumn, connection))
                 {
                     DataReader = com.ExecuteReader();
-                    for (int i = 0; i < DataReader.FieldCount; i++)
+                    for (int i = 1; i < DataReader.FieldCount; i++)
                     {
                         Console.Write(DataReader.GetName(i) + "\t");
                     }
@@ -138,24 +123,44 @@ namespace Console_Gimpie__Database_
             }
             return DataReader;
         }
-        public SqlDataReader DataReaderItemsProductList(string ProductListCheck)
+        public SqlDataReader DataReaderV(string ProductListCheck)
         {
             using (SqlConnection connection = new SqlConnection(connectingString))
             {
                 connection.Open();
                 using (com = new SqlCommand(ProductListCheck, connection))
                 {
+                    
                     DataReader = com.ExecuteReader();
                     while (DataReader.Read())
                     {
-                        for (int i = 0; i < 5; i++)
+                        for (int i = 1; i < 6; i++)
                         {
-
-                            Console.Write(DataReader.GetValue(i) + "\t");
-
+                            if (Convert.ToInt32(DataReader.GetValue(6)) <= 5)
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.Write(DataReader.GetValue(i) + "\t");
+                                Console.ForegroundColor = ConsoleColor.White;
+                            }
+                            else
+                            {
+                                Console.Write(DataReader.GetValue(i) + "\t");
+                            }
                         }
-                        Console.WriteLine("");
+                        if (Convert.ToInt32(DataReader.GetValue(6)) <= 5)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.Write(MainProgram.TotalValue[Index]);
+                            Console.ForegroundColor = ConsoleColor.White;
+                            Index++;
+                        }
+                        else
+                        {
+                            Console.Write(MainProgram.TotalValue[Index]);
+                            Index++;
+                        }
                     }
+                    Console.WriteLine("");
                 }
             }
             return DataReader;
@@ -180,7 +185,7 @@ namespace Console_Gimpie__Database_
             }
         }
 
-        public void InsertBuyHistory(string ProductListCheck, int ProductID, int UserID, decimal Price, int Quantity, int PurchaseID)
+        public void InsertBuyHistory(string ProductListCheck, int ProductID, int UserID, decimal Price, int Quantity, int PurchaseID, string Paid)
         {
             using (SqlConnection connection = new SqlConnection(connectingString))
             {
@@ -192,6 +197,7 @@ namespace Console_Gimpie__Database_
                     com.Parameters.AddWithValue("@Quantity", Quantity);
                     com.Parameters.AddWithValue("@Price", Price);
                     com.Parameters.AddWithValue("@PurchaseID", PurchaseID);
+                    com.Parameters.AddWithValue("@Paid", Paid);
                     int a = com.ExecuteNonQuery();
                     if (a > 0)
                     {

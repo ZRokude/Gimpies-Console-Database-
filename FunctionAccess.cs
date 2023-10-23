@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -88,7 +89,14 @@ namespace Console_Gimpie__Database_
         {
             Random rnd = new Random();
             int RandomNumber = int.Parse("800" + rnd.Next(1, 99999).ToString());
-            return  RandomNumber;
+            string Query = "SELECT * FROM PurchaseHistory WHERE PurchaseID = '" + RandomNumber + "'";
+            DataTable DataList = DataAccess.Instance.ExecuteDataTable(Query);
+            if (DataList.Rows.Count > 0)
+            {
+                RNGNumber();
+            }
+            return RandomNumber;
+
         }
         public void InsertList (int a, int b)
         {

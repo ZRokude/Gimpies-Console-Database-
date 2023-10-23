@@ -11,13 +11,4 @@ namespace Console_Gimpie__Database_
 
         public static List<int> TotalValue = new List<int>();
     }
-    public class ListTotalProductID
-    {
-
-        public static List<int> TotalProductID = new List<int>();
-    }
-    public class ListTotalPurchaseID
-    {
-        public static List<int> TotalPurchaseID = new List<int>();
-    }
 }
